@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"strings"
 )
 
 var _ = net.Listen
@@ -25,15 +24,14 @@ func main() {
 	} else {
 		request := make([]byte, 1024)
 		var response []byte
-		// var response []byte
 		n, err := conn.Read(request)
 		if err != nil {
 			fmt.Println("error reading message")
 			os.Exit(1)
 		}
-		requestTarget := string(request[4:strings.Index(string(request[:]), " ")])
-		fmt.Println(string(request[:n]))
-		if requestTarget != "/" {
+		requestTarget := getRequestTarget(request[:n])
+		// fmt.Println(string(request[:n]))
+		if string(requestTarget) != "/" {
 
 			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 		} else {
@@ -45,4 +43,19 @@ func main() {
 			fmt.Println("Couldn't respond")
 		}
 	}
+}
+func getRequestTarget(request []byte) []byte {
+	var requestTarget []byte
+
+	startCapturingTarget := false
+	for _, ch := range request {
+		if ch == '/' && startCapturingTarget {
+			startCapturingTarget = true
+			requestTarget = append(requestTarget, ch)
+		} else if ch == ' ' && startCapturingTarget {
+			startCapturingTarget = false
+			return requestTarget
+		}
+	}
+	return requestTarget
 }
