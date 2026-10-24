@@ -31,7 +31,7 @@ func main() {
 			fmt.Println("error reading message")
 			os.Exit(1)
 		}
-
+		fmt.Println(string(request[:n]))
 		if strings.Contains(string(request[:n]), "abcdefg") {
 
 			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
