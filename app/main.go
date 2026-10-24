@@ -13,13 +13,13 @@ var _ = net.Listen
 var _ = os.Exit
 
 func main() {
-
+	l, err := net.Listen("tcp", "127.0.0.1:4221")
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
 	for {
-		l, err := net.Listen("tcp", "127.0.0.1:4222")
-		if err != nil {
-			log.Fatal(err)
-			os.Exit(1)
-		}
+
 		conn, err := l.Accept()
 		if err != nil {
 			fmt.Println("Error accepting connection: ", err.Error())
