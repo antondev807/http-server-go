@@ -30,7 +30,6 @@ func main() {
 			os.Exit(1)
 		}
 		requestTarget := getRequestTarget(request[:n])
-		fmt.Println(string(requestTarget))
 		if string(requestTarget) != "/" {
 
 			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
