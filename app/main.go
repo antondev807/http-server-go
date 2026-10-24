@@ -51,8 +51,9 @@ func getRequestTarget(request []byte) []byte {
 		if ch == '/' && !startCapturingTarget {
 			startCapturingTarget = true
 			requestTarget = append(requestTarget, ch)
+		} else if ch != ' ' && startCapturingTarget {
+			requestTarget = append(requestTarget, ch)
 		} else if ch == ' ' && startCapturingTarget {
-			startCapturingTarget = false
 			return requestTarget
 		}
 	}
