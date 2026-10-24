@@ -40,7 +40,7 @@ func main() {
 			str := strings.Split(string(requestTarget), "/")
 
 			response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
-		} else if strings.HasPrefix(string(requestTarget), "user-agent") {
+		} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
 			response = handleUserAgent(request, n)
 		} else {
 			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
@@ -74,7 +74,8 @@ func handleUserAgent(request []byte, n int) []byte {
 
 	userAgentIndex := strings.Index(headers, "User-Agent")
 	userAgent := headers[userAgentIndex:]
-	userAgent = userAgent[:strings.Index(userAgent, "\r\n")]
-	fmt.Println(userAgent)
+	userAgent = userAgent[12:strings.Index(userAgent, "\r\n")]
+
+	response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + strconv.Itoa(len(userAgent)) + "\r\n\r\n" + userAgent)
 	return response
 }
