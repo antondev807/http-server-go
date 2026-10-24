@@ -38,7 +38,7 @@ func main() {
 		} else if strings.HasPrefix(string(requestTarget), "/echo/") {
 			str := strings.Split(string(requestTarget), "/")
 
-			response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + len(str[2]) + "\r\n\r\n" + str[2])
+			response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + string(len(str[2])) + "\r\n\r\n" + str[2])
 		} else {
 			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 
