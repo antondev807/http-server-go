@@ -30,7 +30,7 @@ func main() {
 			os.Exit(1)
 		}
 		requestTarget := getRequestTarget(request[:n])
-		// fmt.Println(string(request[:n]))
+		fmt.Println(string(requestTarget))
 		if string(requestTarget) != "/" {
 
 			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
@@ -49,7 +49,7 @@ func getRequestTarget(request []byte) []byte {
 
 	startCapturingTarget := false
 	for _, ch := range request {
-		if ch == '/' && startCapturingTarget {
+		if ch == '/' && !startCapturingTarget {
 			startCapturingTarget = true
 			requestTarget = append(requestTarget, ch)
 		} else if ch == ' ' && startCapturingTarget {
