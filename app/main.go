@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
 )
 
 var _ = net.Listen
@@ -22,8 +23,25 @@ func main() {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
 	} else {
+		request := make([]byte, 1024)
 		var response []byte
-		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
-		conn.Write(response)
+		// var response []byte
+		n, err := conn.Read(request)
+		if err != nil {
+			fmt.Println("error reading message")
+			os.Exit(1)
+		}
+
+		if strings.Contains(string(request[:n]), "abcdefg") {
+
+			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+		} else {
+			response = []byte("HTTP/1.1 200 OK\r\n\r\n")
+
+		}
+		_, err = conn.Write(response)
+		if err != nil {
+			fmt.Println("Couldn't respond")
+		}
 	}
 }
