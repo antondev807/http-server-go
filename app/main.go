@@ -55,8 +55,9 @@ func handleRequest(conn net.Conn) {
 			response = handleUserAgent(request, n)
 		} else if strings.HasPrefix(string(requestTarget), "/files") {
 			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
-			fmt.Println("sfdasdf")
 			file, err := os.OpenFile(targetFile, os.O_RDONLY, 0777)
+			defer file.Close()
+
 			if err != nil {
 				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 			} else {
@@ -72,6 +73,8 @@ func handleRequest(conn net.Conn) {
 		if strings.HasPrefix(string(requestTarget), "/files") {
 			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
 			file, err := os.OpenFile(targetFile, os.O_CREATE, 0777)
+			defer file.Close()
+
 			if err != nil {
 				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 			} else {
@@ -140,6 +143,7 @@ func writePOSTToFile(file *os.File, request []byte) []byte {
 	contentLengthHeader, _ := strconv.Atoi(contentLengthHeaderBytes)
 	fileContent = request[len(request)-contentLengthHeader:]
 	file, _ = os.OpenFile(file.Name(), os.O_RDWR, 0777)
+	defer file.Close()
 	_, err := file.Write(fileContent)
 
 	if err != nil {
