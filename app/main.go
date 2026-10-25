@@ -56,11 +56,12 @@ func handleRequest(conn net.Conn) {
 		} else if strings.HasPrefix(string(requestTarget), "/files") {
 			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
 			file, err := os.OpenFile(targetFile, os.O_RDONLY, 0777)
-			defer file.Close()
 
 			if err != nil {
 				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 			} else {
+				defer file.Close()
+
 				fileContent := make([]byte, 1024)
 				nChars, _ := file.Read(fileContent)
 				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + strconv.Itoa(nChars) + "\r\n\r\n" + string(fileContent[:nChars]))
@@ -73,11 +74,12 @@ func handleRequest(conn net.Conn) {
 		if strings.HasPrefix(string(requestTarget), "/files") {
 			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
 			file, err := os.OpenFile(targetFile, os.O_CREATE, 0777)
-			defer file.Close()
 
 			if err != nil {
 				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 			} else {
+				defer file.Close()
+
 				response = writePOSTToFile(file, request)
 			}
 		}
@@ -143,13 +145,14 @@ func writePOSTToFile(file *os.File, request []byte) []byte {
 	contentLengthHeader, _ := strconv.Atoi(contentLengthHeaderBytes)
 	fileContent = request[len(request)-contentLengthHeader:]
 	file, _ = os.OpenFile(file.Name(), os.O_RDWR, 0777)
-	defer file.Close()
 	_, err := file.Write(fileContent)
 
 	if err != nil {
 		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 
 	} else {
+		defer file.Close()
+
 		response = []byte("HTTP/1.1 201 Created\r\n\r\n")
 
 	}
