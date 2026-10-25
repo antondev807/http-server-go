@@ -34,7 +34,9 @@ func main() {
 func handleRequest(conn net.Conn) {
 	request := make([]byte, 1024)
 	var response []byte
+
 	n, err := conn.Read(request)
+
 	if err != nil {
 		fmt.Println("error reading message")
 		os.Exit(1)
@@ -123,7 +125,8 @@ func getRequestType(request []byte) string {
 }
 func writePOSTToFile(file *os.File, request []byte) []byte {
 	var fileContent []byte
-
+	trimmedRequest := strings.Trim(string(request), string('\x00'))
+	request = []byte(trimmedRequest) //this is probably buggy as it assumes the byte slice is initialized to this char always
 	//get content length from request
 	//get data from request + content length
 	//write data to file
