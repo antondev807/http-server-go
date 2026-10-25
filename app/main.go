@@ -137,8 +137,7 @@ func writePOSTToFile(file *os.File, request []byte) []byte {
 	contentLengthHeaderBytes = strings.Trim(contentLengthHeaderBytes, " ")
 
 	contentLengthHeader, _ := strconv.Atoi(contentLengthHeaderBytes)
-	fileContent = request[len(request)-contentLengthHeader-1:]
-	fmt.Println(fileContent)
+	fileContent = request[len(request)-contentLengthHeader:]
 	file, _ = os.OpenFile(file.Name(), os.O_RDWR, 0777)
 	_, err := file.Write(fileContent)
 
