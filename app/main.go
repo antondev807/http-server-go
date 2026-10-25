@@ -84,10 +84,10 @@ func handleRequest(conn net.Conn) {
 			}
 		}
 
-		_, err = conn.Write(response)
-		if err != nil {
-			fmt.Println("Couldn't respond")
-		}
+	}
+	_, err = conn.Write(response)
+	if err != nil {
+		fmt.Println("Couldn't respond")
 	}
 }
 func getRequestTarget(request []byte) []byte {
