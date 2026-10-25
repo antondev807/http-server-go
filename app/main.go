@@ -51,7 +51,7 @@ func handleRequest(conn net.Conn) {
 	} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
 		response = handleUserAgent(request, n)
 	} else if strings.HasPrefix(string(requestTarget), "/files") {
-		targetFile := "/tmp/" + strings.Split(string(requestTarget), "/")[2]
+		targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
 		file, err := os.OpenFile(targetFile, os.O_RDONLY, 0777)
 		if err != nil {
 			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
