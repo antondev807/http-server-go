@@ -73,7 +73,7 @@ func handleRequest(conn net.Conn) {
 	} else if requestType == "POST" {
 		if strings.HasPrefix(string(requestTarget), "/files") {
 			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
-			file, err := os.OpenFile(targetFile, os.O_CREATE, 0777)
+			file, err := os.OpenFile(targetFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0777)
 
 			if err != nil {
 				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
