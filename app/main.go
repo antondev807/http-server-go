@@ -68,7 +68,7 @@ func handleRequest(conn net.Conn) {
 	} else if requestType == "POST" {
 		if strings.HasPrefix(string(requestTarget), "/files") {
 			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
-			file, err := os.OpenFile(targetFile, os.O_RDWR, 0777)
+			file, err := os.OpenFile(targetFile, os.O_CREATE, 0777)
 			if err != nil {
 				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 			} else {
@@ -123,13 +123,19 @@ func getRequestType(request []byte) string {
 }
 func writePOSTToFile(file *os.File, request []byte) []byte {
 	var fileContent []byte
+
 	//get content length from request
 	//get data from request + content length
 	//write data to file
 	//return response
 	var response []byte
-	contentLengthHeader := int(request[strings.Index(string(request[:]), "Content-Length")+18])
+	contentLengthHeaderBytes := string(request[strings.Index(string(request), "Content-Length")+16 : strings.Index(string(request), "Content-Length")+19])
+	contentLengthHeaderBytes = strings.Trim(contentLengthHeaderBytes, "\r")
+	contentLengthHeaderBytes = strings.Trim(contentLengthHeaderBytes, " ")
+
+	contentLengthHeader, _ := strconv.Atoi(contentLengthHeaderBytes)
 	fileContent = request[len(request)-contentLengthHeader-1:]
+	fmt.Println(fileContent)
 	_, err := file.Write(fileContent)
 
 	if err != nil {
