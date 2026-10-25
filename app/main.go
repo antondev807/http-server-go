@@ -39,34 +39,47 @@ func handleRequest(conn net.Conn) {
 		fmt.Println("error reading message")
 		os.Exit(1)
 	}
+	requestType := getRequestType(request[:n])
 	requestTarget := getRequestTarget(request[:n])
+	if requestType == "GET" {
+		if string(requestTarget) == "/" {
+			response = []byte("HTTP/1.1 200 OK\r\n\r\n")
 
-	if string(requestTarget) == "/" {
-		response = []byte("HTTP/1.1 200 OK\r\n\r\n")
+		} else if strings.HasPrefix(string(requestTarget), "/echo/") {
+			str := strings.Split(string(requestTarget), "/")
 
-	} else if strings.HasPrefix(string(requestTarget), "/echo/") {
-		str := strings.Split(string(requestTarget), "/")
-
-		response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
-	} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
-		response = handleUserAgent(request, n)
-	} else if strings.HasPrefix(string(requestTarget), "/files") {
-		targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
-		file, err := os.OpenFile(targetFile, os.O_RDONLY, 0777)
-		if err != nil {
-			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+			response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
+		} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
+			response = handleUserAgent(request, n)
+		} else if strings.HasPrefix(string(requestTarget), "/files") {
+			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
+			file, err := os.OpenFile(targetFile, os.O_RDONLY, 0777)
+			if err != nil {
+				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+			} else {
+				fileContent := make([]byte, 1024)
+				nChars, _ := file.Read(fileContent)
+				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + strconv.Itoa(nChars) + "\r\n\r\n" + string(fileContent[:nChars]))
+			}
 		} else {
-			fileContent := make([]byte, 1024)
-			nChars, _ := file.Read(fileContent)
-			response = []byte("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: " + strconv.Itoa(nChars) + "\r\n\r\n" + string(fileContent[:nChars]))
-		}
-	} else {
-		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+			response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
 
-	}
-	_, err = conn.Write(response)
-	if err != nil {
-		fmt.Println("Couldn't respond")
+		}
+	} else if requestType == "POST" {
+		if strings.HasPrefix(string(requestTarget), "/files") {
+			targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
+			file, err := os.OpenFile(targetFile, os.O_RDWR, 0777)
+			if err != nil {
+				response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+			} else {
+				response = writePOSTToFile(file, request)
+			}
+		}
+
+		_, err = conn.Write(response)
+		if err != nil {
+			fmt.Println("Couldn't respond")
+		}
 	}
 }
 func getRequestTarget(request []byte) []byte {
@@ -96,3 +109,41 @@ func handleUserAgent(request []byte, n int) []byte {
 	response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + strconv.Itoa(len(userAgent)) + "\r\n\r\n" + userAgent)
 	return response
 }
+func getRequestType(request []byte) string {
+	var requestType string
+	for _, ch := range request {
+		if ch == ' ' {
+			break
+
+		} else {
+			requestType = requestType + string(ch)
+		}
+	}
+	return requestType
+}
+func writePOSTToFile(file *os.File, request []byte) []byte {
+	var fileContent []byte
+	//get content length from request
+	//get data from request + content length
+	//write data to file
+	//return response
+	var response []byte
+	contentLengthHeader := int(request[strings.Index(string(request[:]), "Content-Length")+18])
+	fileContent = request[len(request)-contentLengthHeader-1:]
+	_, err := file.Write(fileContent)
+
+	if err != nil {
+		response = []byte("HTTP/1.1 404 Not Found\r\n\r\n")
+
+	} else {
+		response = []byte("HTTP/1.1 201 Created\r\n\r\n")
+
+	}
+	return response
+}
+
+// func getData(request []byte, contentLength int) string {
+// 	var data string
+// 	data = string(request[len(request)-contentLength-1:])
+// 	return data
+// }
