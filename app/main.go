@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/gzip"
 	"fmt"
 	"log"
 	"net"
@@ -55,7 +57,17 @@ func handleRequest(conn net.Conn) {
 			str := strings.Split(string(requestTarget), "/")
 			if strings.Contains(requestHeaders["Accept-Encoding"], "gzip") {
 				// fmt.Println("here")
-				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
+				var buf bytes.Buffer
+
+				writer := gzip.NewWriter(&buf)
+				_, err := writer.Write([]byte(str[2]))
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				_ = writer.Close().Error()
+				compressed := buf.Bytes()
+				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(compressed)) + "\r\n\r\n" + string(compressed))
 
 			} else {
 
