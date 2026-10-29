@@ -66,11 +66,24 @@ func handleRequest(conn net.Conn) {
 						_ = writer.Close()
 						compressed := buf.Bytes()
 						response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(compressed)) + "\r\n\r\n" + string(compressed))
+						if requestHeaders["Connection"] == "close" {
+							response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(compressed)) + "\r\n\r\n" + string(compressed))
 
+							break
+						} else {
+							response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(compressed)) + "\r\n\r\n" + string(compressed))
+
+						}
 					} else {
+						if requestHeaders["Connection"] == "close" {
+							response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\nConnection: close\r\n\r\n" + str[2])
 
-						response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
+							break
+						} else {
+							response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
+						}
 					}
+
 				} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
 					response = handleUserAgent(request, n)
 				} else if strings.HasPrefix(string(requestTarget), "/files") {
@@ -109,10 +122,9 @@ func handleRequest(conn net.Conn) {
 			if err != nil {
 				fmt.Println("Couldn't respond")
 			}
-			if requestHeaders["Connection"] == "close" {
-				conn.Close()
-			}
+
 		}
+		conn.Close()
 
 	}
 
