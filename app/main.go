@@ -91,7 +91,8 @@ func handleRequest(conn net.Conn) {
 					}
 
 				} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
-					response, shouldClose := handleUserAgent(request, n, requestHeaders)
+					whatever, shouldClose := handleUserAgent(request, n, requestHeaders)
+					response = whatever
 					if shouldClose {
 						break
 					}
