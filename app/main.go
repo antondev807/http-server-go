@@ -120,7 +120,7 @@ func getRequestHeaders(request []byte) map[string]string {
 
 	}
 	// requestHeaders["test"] = "foo"
-	fmt.Println(requestHeaders)
+	// fmt.Println(requestHeaders)
 	return requestHeaders
 
 }
