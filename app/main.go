@@ -119,6 +119,7 @@ func getRequestHeaders(request []byte) map[string]string {
 		}
 
 	}
+	fmt.Println(requestHeaders)
 	return requestHeaders
 
 }
