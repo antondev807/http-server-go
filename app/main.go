@@ -91,8 +91,8 @@ func handleRequest(conn net.Conn) {
 					}
 
 				} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
-					response,shouldClose := handleUserAgent(request, n)
-					if shouldClose{
+					response, shouldClose := handleUserAgent(request, n, requestHeaders)
+					if shouldClose {
 						break
 					}
 				} else if strings.HasPrefix(string(requestTarget), "/files") {
@@ -187,19 +187,20 @@ func getRequestTarget(request []byte) []byte {
 	}
 	return requestTarget
 }
-func handleUserAgent(request []byte, n int) []byte ,bool{
+func handleUserAgent(request []byte, n int, requestHeaders map[string]string) ([]byte, bool) {
 	var response []byte
 	headers := strings.Split(string(request[:n]), "Host: localhost:4221\r\n")[1]
 
 	userAgentIndex := strings.Index(headers, "User-Agent")
 	userAgent := headers[userAgentIndex:]
 	userAgent = userAgent[12:strings.Index(userAgent, "\r\n")]
+	var shouldClose = false
 	if requestHeaders["Connection"] == "close" {
-		shouldClose:=true
+		shouldClose = true
 		response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\nContent-Length: " + strconv.Itoa(len(userAgent)) + "\r\n\r\n" + userAgent)
 
 	} else {
-		shouldClose:=false
+		shouldClose = false
 		response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + strconv.Itoa(len(userAgent)) + "\r\n\r\n" + userAgent)
 
 	}
