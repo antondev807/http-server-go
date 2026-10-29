@@ -61,7 +61,6 @@ func handleRequest(conn net.Conn) {
 
 				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
 			}
-			response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
 		} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
 			response = handleUserAgent(request, n)
 		} else if strings.HasPrefix(string(requestTarget), "/files") {
