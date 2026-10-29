@@ -112,7 +112,7 @@ func handleRequest(conn net.Conn, l net.Listener) {
 		fmt.Println("Couldn't respond")
 	}
 
-	conn, err := l.Accept()
+	conn, err = l.Accept()
 	if err != nil {
 		fmt.Println("Error accepting connection: ", err.Error())
 		os.Exit(1)
