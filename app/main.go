@@ -53,7 +53,7 @@ func handleRequest(conn net.Conn) {
 		} else if strings.HasPrefix(string(requestTarget), "/echo/") {
 			// fmt.Println(requestHeaders["Content-Encoding"])
 			str := strings.Split(string(requestTarget), "/")
-			if requestHeaders["Accept-Encoding"] == "gzip" {
+			if strings.Contains(requestHeaders["Accept-Encoding"], "gzip") {
 				// fmt.Println("here")
 				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
 
