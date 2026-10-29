@@ -50,7 +50,7 @@ func handleRequest(conn net.Conn) {
 				if string(requestTarget) == "/" {
 					if requestHeaders["Connection"] == "close" {
 						response = []byte("HTTP/1.1 200 OK\r\n\r\nConnection: close")
-
+						fmt.Println("what")
 						// break
 					} else {
 						response = []byte("HTTP/1.1 200 OK\r\n\r\n")
