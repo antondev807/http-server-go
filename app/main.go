@@ -91,7 +91,10 @@ func handleRequest(conn net.Conn) {
 					}
 
 				} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
-					response = handleUserAgent(request, n)
+					response,shouldClose := handleUserAgent(request, n)
+					if shouldClose{
+						break
+					}
 				} else if strings.HasPrefix(string(requestTarget), "/files") {
 					targetFile := "/tmp/data/codecrafters.io/http-server-tester/" + strings.Split(string(requestTarget), "/")[2]
 					file, err := os.OpenFile(targetFile, os.O_RDONLY, 0777)
@@ -132,7 +135,6 @@ func handleRequest(conn net.Conn) {
 		}
 
 	}
-	fmt.Println("here for some reason")
 	conn.Close()
 
 	// conn, err = l.Accept()
@@ -185,16 +187,23 @@ func getRequestTarget(request []byte) []byte {
 	}
 	return requestTarget
 }
-func handleUserAgent(request []byte, n int) []byte {
+func handleUserAgent(request []byte, n int) []byte ,bool{
 	var response []byte
 	headers := strings.Split(string(request[:n]), "Host: localhost:4221\r\n")[1]
 
 	userAgentIndex := strings.Index(headers, "User-Agent")
 	userAgent := headers[userAgentIndex:]
 	userAgent = userAgent[12:strings.Index(userAgent, "\r\n")]
+	if requestHeaders["Connection"] == "close" {
+		shouldClose:=true
+		response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\nContent-Length: " + strconv.Itoa(len(userAgent)) + "\r\n\r\n" + userAgent)
 
-	response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + strconv.Itoa(len(userAgent)) + "\r\n\r\n" + userAgent)
-	return response
+	} else {
+		shouldClose:=false
+		response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: " + strconv.Itoa(len(userAgent)) + "\r\n\r\n" + userAgent)
+
+	}
+	return response, shouldClose
 }
 func getRequestType(request []byte) string {
 	var requestType string
