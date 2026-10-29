@@ -48,7 +48,14 @@ func handleRequest(conn net.Conn) {
 			requestTarget := getRequestTarget(request[:n])
 			if requestType == "GET" {
 				if string(requestTarget) == "/" {
-					response = []byte("HTTP/1.1 200 OK\r\n\r\n")
+					if requestHeaders["Connection"] == "close" {
+						response = []byte("HTTP/1.1 200 OK\r\n\r\nConnection: close")
+
+						break
+					} else {
+						response = []byte("HTTP/1.1 200 OK\r\n\r\n")
+
+					}
 
 				} else if strings.HasPrefix(string(requestTarget), "/echo/") {
 					// fmt.Println(requestHeaders["Content-Encoding"])
