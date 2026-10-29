@@ -65,7 +65,6 @@ func handleRequest(conn net.Conn) {
 
 						_ = writer.Close()
 						compressed := buf.Bytes()
-						response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(compressed)) + "\r\n\r\n" + string(compressed))
 						if requestHeaders["Connection"] == "close" {
 							response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nConnection: close\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(compressed)) + "\r\n\r\n" + string(compressed))
 
