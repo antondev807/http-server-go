@@ -109,6 +109,9 @@ func handleRequest(conn net.Conn) {
 			if err != nil {
 				fmt.Println("Couldn't respond")
 			}
+			if requestHeaders["Connection"] == "close" {
+				conn.Close()
+			}
 		}
 
 	}
