@@ -132,6 +132,7 @@ func handleRequest(conn net.Conn) {
 		}
 
 	}
+	fmt.Println("here for some reason")
 	conn.Close()
 
 	// conn, err = l.Accept()
