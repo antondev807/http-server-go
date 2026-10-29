@@ -27,13 +27,13 @@ func main() {
 			fmt.Println("Error accepting connection: ", err.Error())
 			os.Exit(1)
 		} else {
-			go handleRequest(conn)
+			go handleRequest(conn, l)
 
 		}
 	}
 
 }
-func handleRequest(conn net.Conn) {
+func handleRequest(conn net.Conn, l net.Listener) {
 	request := make([]byte, 1024)
 	var response []byte
 
@@ -111,6 +111,18 @@ func handleRequest(conn net.Conn) {
 	if err != nil {
 		fmt.Println("Couldn't respond")
 	}
+	for {
+
+		conn, err := l.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection: ", err.Error())
+			os.Exit(1)
+		} else {
+			go handleRequest(conn, l)
+
+		}
+	}
+
 }
 
 func getRequestHeaders(request []byte) map[string]string {
