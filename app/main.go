@@ -35,6 +35,7 @@ func handleRequest(conn net.Conn) {
 	request := make([]byte, 1024)
 	var response []byte
 
+	requestHeaders := getRequestHeaders(request)
 	n, err := conn.Read(request)
 
 	if err != nil {
@@ -42,6 +43,7 @@ func handleRequest(conn net.Conn) {
 		os.Exit(1)
 	}
 	requestType := getRequestType(request[:n])
+
 	requestTarget := getRequestTarget(request[:n])
 	if requestType == "GET" {
 		if string(requestTarget) == "/" {
@@ -49,7 +51,13 @@ func handleRequest(conn net.Conn) {
 
 		} else if strings.HasPrefix(string(requestTarget), "/echo/") {
 			str := strings.Split(string(requestTarget), "/")
+			if requestHeaders["Content-Encoding"] == "gzip" {
+				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
 
+			} else {
+
+				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
+			}
 			response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
 		} else if strings.HasPrefix(string(requestTarget), "/user-agent") {
 			response = handleUserAgent(request, n)
@@ -89,6 +97,22 @@ func handleRequest(conn net.Conn) {
 	if err != nil {
 		fmt.Println("Couldn't respond")
 	}
+}
+
+func getRequestHeaders(request []byte) map[string]string {
+	requestHeaders := make(map[string]string)
+	requestString := string(request)
+	requestLines := strings.Split(requestString, "\r\n")
+	for _, line := range requestLines {
+		if strings.Index(line, ":") != -1 {
+			key := line[:strings.Index(line, ":")]
+			value := line[strings.Index(line, ":")+1 : strings.Index(line, "\r\n")]
+			requestHeaders[key] = value
+		}
+
+	}
+	return requestHeaders
+
 }
 func getRequestTarget(request []byte) []byte {
 	var requestTarget []byte
