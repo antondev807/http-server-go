@@ -123,9 +123,9 @@ func handleRequest(conn net.Conn) {
 			}
 
 		}
-		conn.Close()
 
 	}
+	conn.Close()
 
 	// conn, err = l.Accept()
 	// if err != nil {
