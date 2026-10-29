@@ -35,13 +35,14 @@ func handleRequest(conn net.Conn) {
 	request := make([]byte, 1024)
 	var response []byte
 
-	requestHeaders := getRequestHeaders(request)
 	n, err := conn.Read(request)
 
 	if err != nil {
 		fmt.Println("error reading message")
 		os.Exit(1)
 	}
+	requestHeaders := getRequestHeaders(request[:n])
+
 	requestType := getRequestType(request[:n])
 
 	requestTarget := getRequestTarget(request[:n])
@@ -50,7 +51,7 @@ func handleRequest(conn net.Conn) {
 			response = []byte("HTTP/1.1 200 OK\r\n\r\n")
 
 		} else if strings.HasPrefix(string(requestTarget), "/echo/") {
-			// fmt.Println(requestHeaders["Content-Encoding"])
+			fmt.Println(requestHeaders["Content-Encoding"])
 			str := strings.Split(string(requestTarget), "/")
 			if requestHeaders["Accept-Encoding"] == "gzip" {
 				response = []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Encoding: gzip\r\nContent-Length:" + strconv.Itoa(len(str[2])) + "\r\n\r\n" + str[2])
@@ -103,11 +104,17 @@ func handleRequest(conn net.Conn) {
 func getRequestHeaders(request []byte) map[string]string {
 	requestHeaders := make(map[string]string)
 	requestString := string(request)
+	// fmt.Println(requestString)
+
 	requestLines := strings.Split(requestString, "\r\n")
 	for _, line := range requestLines {
+
 		if strings.Index(line, ":") != -1 {
-			key := line[:strings.Index(line, ":")]
-			value := line[strings.Index(line, ":")+1 : strings.Index(line, "\r\n")]
+			parts := strings.SplitN(line, ":", 2)
+
+			key := parts[0]
+			value := strings.TrimSpace(parts[1])
+
 			requestHeaders[key] = value
 		}
 
