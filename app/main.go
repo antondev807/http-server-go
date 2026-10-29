@@ -40,7 +40,7 @@ func handleRequest(conn net.Conn) {
 	for {
 		n, err := conn.Read(request)
 
-		if err != nil {
+		if err == nil {
 			requestHeaders := getRequestHeaders(request[:n])
 
 			requestType := getRequestType(request[:n])
